@@ -1,0 +1,68 @@
+version: '3'
+
+# Define services
+services:
+
+  # Backend service
+  backend-service:
+    build:
+      context: ./backend # Use an image built from the specified dockerfile in the `backend` directory.
+      dockerfile: Dockerfile
+    container_name: backend-service-v2
+    ports:
+      - "8080:8080" # Forward the exposed port 8080 on the container to port 8080 on the host machine
+    restart: always
+    depends_on:
+        - db-postgres # This service depends on mysql. Start that first.
+    environment: # Pass environment variables to the service
+      SPRING_DATASOURCE_URL: jdbc:postgresql://localhost:5432/postgres?useSSL=false&serverTimezone=UTC&useLegacyDatetimeCode=false
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: 123456
+    networks: # Networks to join (Services on the same network can communicate with each other using their name)
+      - backend
+
+  # Frontend Service
+  frontend-service:
+    build:
+      context: frontend # Use an image built from the specified dockerfile in the `frontend` directory.
+      dockerfile: Dockerfile
+      args:
+        REACT_APP_API_BASE_URL: http://127.0.0.1:8080/api
+    container_name: frontend-service-v2
+    ports:
+      - "3000:80" # Forward the exposed port 80 on the container to port 80 on the host machine
+    restart: always
+    depends_on:
+      - backend-service
+    networks:
+      - frontend
+
+  # Database Service (Postgres)
+  db-postgres:
+    image: postgres:13.2
+    container_name: db-postgres
+    ports:
+      - "5432:5432"
+    restart: always
+    environment:
+      POSTGRES_PASSWORD: 123456
+      POSTGRES_USER: postgres
+      POSTGRES_DB: postgres
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    networks:
+      - backend
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 2s
+      timeout: 20s
+      retries: 10
+
+# Volumes
+volumes:
+  db-data:
+
+# Networks to be created to facilitate communication between containers
+networks:
+  backend:
+  frontend:

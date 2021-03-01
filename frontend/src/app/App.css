@@ -1,0 +1,12 @@
+@import '~antd/dist/antd.css';
+.appHeader{
+    background-color: #f3bba6;
+}
+
+.appSider{
+    background-color: #f3bba6;
+}
+
+.appFooter{
+    background-color: #f3bba6;
+}
