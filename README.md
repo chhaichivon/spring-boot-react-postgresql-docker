@@ -1,4 +1,4 @@
-  # Spring boot, mysql and react js using docker deployment
+  # Spring boot, react js and postgres with docker deployment
 
     1. Spring Boot framework
     2. Mysql database
